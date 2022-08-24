@@ -157,7 +157,7 @@ const promptUser = function () {
     .then((queryData) => {
       console.log(queryData);
       if(queryData.userChoice=="complete queries"){
-        makeUpdates(queryData);
+        handleUserInput(queryData);
       }
       else {
         promptUser();
@@ -165,7 +165,7 @@ const promptUser = function () {
     });
 };
 
-const makeUpdates = function(queryData) {
+const handleUserInput = function(queryData) {
 
 };
 
