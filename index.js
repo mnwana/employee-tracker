@@ -63,7 +63,6 @@ const promptUser = function () {
         name: "roleAddDepartment",
         message:
           "Please enter the department of the role you would like to add:",
-        
         type: "list",
         choices: departments,
         when: ({ userChoice }) => {
@@ -212,36 +211,40 @@ const handleUserInput = function (queryData) {
 };
 
 const roles = function () {
-  var sql = "Select title from role"
-  db.query(sql, (err, result) => {
+  var sql = "Select title from role;"
+  return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
     if (err) {
       console.log(err);
-      return;
+      return reject;
     }
-    console.log(result);
-  });
+    // console.log(result.map(a => a.name));
+    resolve(result.map(a => a.name));
+  }));
 }
 
 const employees = function () {
-  var sql = "Select first_name from employee"
-  db.query(sql, (err, result) => {
+  var sql = "Select concat(first_name, ' ', last_name from employee;"
+  return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
     if (err) {
       console.log(err);
-      return;
+      return reject;
     }
-    console.log(result);
-  });
+    // console.log(result.map(a => a.name));
+    resolve(result.map(a => a.name));
+  }));
 }
 
 const departments = function () {
-  var sql = "Select name from department"
-  db.query(sql, (err, result) => {
+  // var deps = [];
+  var sql = "Select name from department;"
+  return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
     if (err) {
       console.log(err);
-      return;
+      return reject;
     }
-    console.log(result);
-  });
+    // console.log(result.map(a => a.name));
+    resolve(result.map(a => a.name));
+  }));
 }
 
 const addDepartmentQuery = function (queryData) {
@@ -277,3 +280,5 @@ const init = function () {
 };
 
 init();
+
+// console.log(departments());
