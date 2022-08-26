@@ -281,15 +281,11 @@ const handleUserInput = function (queryData) {
   } else if (queryData.userChoice == "add a department") {
     addDepartmentQuery(queryData);
   } else if (queryData.userChoice == "add a role") {
-    var inputs = addRoleQuery(queryData);
-    sql = inputs[0];
-    params = inputs[1];
+    addRoleQuery(queryData);
   } else if (queryData.userChoice == "add an employee") {
     addEmployeeQuery(queryData);
   } else if (queryData.userChoice == "update an employee role") {
-    var inputs = updateEmployeeQuery(queryData);
-    sql = inputs[0];
-    params = inputs[1];
+    updateEmployeeQuery(queryData);
   }
 };
 
@@ -341,12 +337,21 @@ const addEmployeeQuery = function (queryData) {
 };
 
 const updateEmployeeQuery = function (queryData) {
-  return [
-    `UPDATE employee 
-  SET role_id = ?
-  WHERE ID = ? ;`,
-    [queryData.updateEmployeeRole, queryData.updateEmployeeID],
-  ];
+  var sql = `UPDATE employee SET role_id = ? WHERE ID = ? ;`;
+  var params = []
+  roleId(queryData.updateEmployeeRole).then((result) => {
+    params.push(result);
+    employeeId(queryData.updateEmployeeName).then((result) => {
+      params.push(result);
+      db.query(sql, params, (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.table(result);
+      });
+    });
+  });
 };
 
 const init = function () {
