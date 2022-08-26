@@ -213,16 +213,27 @@ const promptUser = function () {
           }
         },
       },
-      // TODO: ensure that no manager (null) is an option
+      {
+        name: "managerConfirm",
+        type: "confirm",
+        message: "Does this employee have a manager?",
+        when: ({ userChoice }) => {
+          if (userChoice == "add an employee") {
+            return true;
+          } else {
+            return false;
+          }
+        },
+      },
       {
         name: "employeeAddManager",
         message:
-          "Please enter the manager of the employee you would like to add:",
+          "Please enter the manager of the employee you would like to add. Press enter if there is not a manager:",
 
         type: "list",
-        choices: employees.push('No Manager'),
-        when: ({ userChoice }) => {
-          if (userChoice == "add an employee") {
+        choices: employees,
+        when: ({ managerConfirm }) => {
+          if (managerConfirm == "add an employee") {
             return true;
           } else {
             return false;
@@ -377,6 +388,7 @@ const addEmployeeQuery = function (queryData) {
   // get role id then employee id of manager for new employee then run query
   roleId(queryData.employeeAddRole).then((result) => {
     params.push(result);
+    if(queryData.managerConfirm){
     employeeId(queryData.employeeAddManager).then((result) => {
       params.push(result);
       db.query(sql, params, (err, result) => {
@@ -388,6 +400,21 @@ const addEmployeeQuery = function (queryData) {
         console.table(result);
       });
     });
+  }
+  else{
+    employeeId(queryData.employeeAddManager).then((result) => {
+      sql = `INSERT INTO employee (first_name,last_name,role_id)
+      VALUES (?,?,?) ;`;
+      db.query(sql, params, (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log(`\n`);
+        console.table(result);
+      });
+    });
+  }
   });
 };
 
