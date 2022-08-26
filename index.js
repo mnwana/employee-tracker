@@ -1,8 +1,8 @@
 const inquirer = require("inquirer");
-const { query } = require("./db/connection");
 const db = require("./db/connection");
 const cTable = require("console.table");
 
+// array of database operations
 const userChoices = [
   "view all departments",
   "view all roles",
@@ -14,38 +14,45 @@ const userChoices = [
   "complete queries",
 ];
 
+// query to return array of role and department names
 const roles = function () {
   var sql =
-    "Select distinct concat(department.name, ' - ' , role.title) as title from role left join department on role.department_id = department.id;";
+    `Select distinct concat(department.name, ' - ' , role.title) as title 
+    from role 
+    left join department on role.department_id = department.id;`;
   return new Promise((resolve, reject) =>
     db.query(sql, [], (err, result) => {
       if (err) {
         console.log(err);
         return reject;
       }
-      // console.log(result.map(a => a.title));
       resolve(result.map((a) => a.title));
     })
   );
 };
 
+// query to return role id based on role and department name
 const roleId = function (roleName) {
   var sql =
-    "Select role.id from role left join department on role.department_id = department.id where concat(department.name, ' - ' , role.title) = ?;";
+    `Select role.id 
+    from role 
+    left join department on role.department_id = department.id 
+    where concat(department.name, ' - ' , role.title) = ?;`;
   return new Promise((resolve, reject) =>
     db.query(sql, [roleName], (err, result) => {
       if (err) {
         console.log(err);
         return reject;
       }
-      // console.log(result.map(a => a.id)[0]);
       resolve(result.map((a) => a.id)[0]);
     })
   );
 };
 
+// query to return array of employee first and last names
 const employees = function () {
-  var sql = "Select concat(first_name,' ', last_name) as name from employee;";
+  var sql = `Select concat(first_name,' ', last_name) as name 
+  from employee;`;
   return new Promise((resolve, reject) =>
     db.query(sql, [], (err, result) => {
       if (err) {
@@ -57,9 +64,12 @@ const employees = function () {
   );
 };
 
+// query to return an employee id based on first and last name
 const employeeId = function (employeeName) {
   var sql =
-    "Select employee.id from employee where concat(first_name,' ', last_name) = ?;";
+    `Select employee.id 
+    from employee 
+    where concat(first_name,' ', last_name) = ?;`;
   return new Promise((resolve, reject) =>
     db.query(sql, [employeeName], (err, result) => {
       if (err) {
@@ -71,6 +81,7 @@ const employeeId = function (employeeName) {
   );
 };
 
+// query to return an array of department names
 const departments = function () {
   var sql = "Select name from department;";
   return new Promise((resolve, reject) =>
@@ -84,6 +95,7 @@ const departments = function () {
   );
 };
 
+// query to return a department id based on department name
 const departmentId = function (departmentName) {
   var sql = "Select department.id from department where name = ?;";
   return new Promise((resolve, reject) =>
@@ -97,15 +109,18 @@ const departmentId = function (departmentName) {
   );
 };
 
+// prompt user for their database actions
 const promptUser = function () {
   return inquirer
     .prompt([
+      // prompt user for what they'd like to do
       {
         name: "userChoice",
         message: "What would you like to do?",
         type: "list",
         choices: userChoices,
       },
+      // if add department, get department name
       {
         name: "departmentAddName",
         message:
@@ -119,6 +134,7 @@ const promptUser = function () {
           }
         },
       },
+      // if add role, get role name, salary, and department
       {
         name: "roleAddName",
         message: "Please enter the name of the role you would like to add:",
@@ -157,6 +173,7 @@ const promptUser = function () {
           }
         },
       },
+      // if add employee, get first name, last name, role and manager
       {
         name: "employeeAddFName",
         message:
@@ -196,13 +213,14 @@ const promptUser = function () {
           }
         },
       },
+      // TODO: ensure that no manager (null) is an option
       {
         name: "employeeAddManager",
         message:
           "Please enter the manager of the employee you would like to add:",
 
         type: "list",
-        choices: employees,
+        choices: employees.push('No Manager'),
         when: ({ userChoice }) => {
           if (userChoice == "add an employee") {
             return true;
@@ -211,6 +229,7 @@ const promptUser = function () {
           }
         },
       },
+      // if update employee, get name of employee and role they will be set to
       {
         name: "updateEmployeeName",
         message:
@@ -241,17 +260,23 @@ const promptUser = function () {
       },
     ])
     .then((queryData) => {
+      // call function to perform database actions
       handleUserInput(queryData);
+      // if option is to exit, end quit app
       if (queryData.userChoice == "complete queries") {
         console.log("Goodbye!");
         process.exit();
-      } else {
+      } 
+      // if not complete queries, ask user for the next action
+      else {
         promptUser();
       }
     });
 };
 
+// handle user input from inquirer prompt
 const handleUserInput = function (queryData) {
+  // select all department names and ids
   if (queryData.userChoice == "view all departments") {
     db.query("Select * from department;", [], (err, result) => {
       if (err) {
@@ -261,6 +286,7 @@ const handleUserInput = function (queryData) {
       console.log(`\n`);
       console.table(result);
     });
+    // select role title, id, salary, and department name
   } else if (queryData.userChoice == "view all roles") {
     db.query(
       "Select role.*, department.name from role left join department on role.department_id = department.id;",
@@ -274,6 +300,7 @@ const handleUserInput = function (queryData) {
         console.table(result);
       }
     );
+    // select employee name, titole, role, salary, department and manager
   } else if (queryData.userChoice == "view all employees") {
     db.query(
       `Select employee.first_name,employee.last_name, role.title as role, role.salary, department.name as department, concat(manager.first_name, ' ',manager.last_name) as manager   
@@ -291,17 +318,26 @@ const handleUserInput = function (queryData) {
         console.table(result);
       }
     );
-  } else if (queryData.userChoice == "add a department") {
+  } 
+  // add department name to departments
+  else if (queryData.userChoice == "add a department") {
     addDepartmentQuery(queryData);
-  } else if (queryData.userChoice == "add a role") {
+  } 
+  // add role name and department id to roles
+  else if (queryData.userChoice == "add a role") {
     addRoleQuery(queryData);
-  } else if (queryData.userChoice == "add an employee") {
+  } 
+  // add employee first name, last name, role and manager
+  else if (queryData.userChoice == "add an employee") {
     addEmployeeQuery(queryData);
-  } else if (queryData.userChoice == "update an employee role") {
+  } 
+  // update employee role id
+  else if (queryData.userChoice == "update an employee role") {
     updateEmployeeQuery(queryData);
   }
 };
 
+// run query to add department
 const addDepartmentQuery = function (queryData) {
   var sql = `INSERT INTO department (name) VALUES (?) ;`;
   db.query(sql, [queryData.departmentAddName], (err, result) => {
@@ -314,10 +350,12 @@ const addDepartmentQuery = function (queryData) {
   });
 };
 
+// run query to add role
 const addRoleQuery = function (queryData) {
   var sql = `INSERT INTO role (salary,title,department_id)
    VALUES (?,?,?) ;`;
   var params = [queryData.roleAddSalary, queryData.roleAddName];
+  // get department id for new role then run query
   departmentId(queryData.roleAddDepartment).then((result) => {
     params.push(result);
     db.query(sql, params, (err, result) => {
@@ -331,10 +369,12 @@ const addRoleQuery = function (queryData) {
   });
 };
 
+// run query to add employee
 const addEmployeeQuery = function (queryData) {
   var sql = `INSERT INTO employee (first_name,last_name,role_id,manager_id)
     VALUES (?,?,?,?) ;`;
   var params = [queryData.employeeAddFName, queryData.employeeAddLName];
+  // get role id then employee id of manager for new employee then run query
   roleId(queryData.employeeAddRole).then((result) => {
     params.push(result);
     employeeId(queryData.employeeAddManager).then((result) => {
@@ -351,9 +391,11 @@ const addEmployeeQuery = function (queryData) {
   });
 };
 
+// run query to update employee
 const updateEmployeeQuery = function (queryData) {
   var sql = `UPDATE employee SET role_id = ? WHERE ID = ? ;`;
   var params = [];
+  // get role id then employee id for updated employee
   roleId(queryData.updateEmployeeRole).then((result) => {
     params.push(result);
     employeeId(queryData.updateEmployeeName).then((result) => {
@@ -370,12 +412,9 @@ const updateEmployeeQuery = function (queryData) {
   });
 };
 
+// initiate app
 const init = function () {
-  if (process.argv[2] == "mock") {
-  } else {
-    promptUser().then(() => {
-    });
-  }
+    promptUser().then(() => {});
 };
 
 init();
