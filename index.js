@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const { query } = require("./db/connection");
 const db = require("./db/connection");
+const cTable = require('console.table');
 
 const userChoices = [
   "view all departments",
@@ -37,7 +38,6 @@ const employees = function () {
 }
 
 const departments = function () {
-  // var deps = [];
   var sql = "Select name from department;"
   return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
     if (err) {
@@ -239,7 +239,7 @@ const handleUserInput = function (queryData) {
       console.log(err);
       return;
     }
-    console.log(result);
+    console.table(result);
     console.log('Move arrow up or down to reveal menu and choose another action.');
   });
 };
