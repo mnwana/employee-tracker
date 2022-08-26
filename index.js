@@ -294,11 +294,14 @@ const handleUserInput = function (queryData) {
 };
 
 const addDepartmentQuery = function (queryData) {
-  return [
-    `INSERT INTO department (name)
-   VALUES (?) ;`,
-    [queryData.departmentAddName],
-  ];
+  var sql  =`INSERT INTO department (name) VALUES (?) ;`
+  db.query(sql, [], (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.table(result);
+  });
 };
 
 const addRoleQuery = function (queryData) {
