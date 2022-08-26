@@ -1,4 +1,5 @@
 const inquirer = require("inquirer");
+const { query } = require("./db/connection");
 const db = require("./db/connection");
 
 const userChoices = [
@@ -22,7 +23,7 @@ const promptUser = function () {
         choices: userChoices,
       },
       {
-        name: "departmentAdd",
+        name: "departmentAddName",
         message:
           "Please enter the name of the department you would like to add:",
         type: "input",
@@ -73,7 +74,7 @@ const promptUser = function () {
         },
       },
       {
-        name: "userAddFName",
+        name: "employeeAddFName",
         message:
           "Please enter the first name of the employee you would like to add:",
         type: "input",
@@ -86,7 +87,7 @@ const promptUser = function () {
         },
       },
       {
-        name: "userAddLName",
+        name: "employeeAddLName",
         message:
           "Please enter the last name of the employee you would like to add:",
         type: "input",
@@ -99,7 +100,7 @@ const promptUser = function () {
         },
       },
       {
-        name: "userAddRole",
+        name: "employeeAddRole",
         message:
           "Please enter the first name of the employee you would like to add:",
         //   update this to be roles in DB
@@ -113,7 +114,7 @@ const promptUser = function () {
         },
       },
       {
-        name: "userAddManager",
+        name: "employeeAddManager",
         message:
           "Please enter the manager of the employee you would like to add:",
         //   update this to be managers in DB
@@ -170,7 +171,31 @@ const handleUserInput = function (queryData) {
   var sql = "";
   var params = [];
   if (queryData.userChoice == "view all departments") {
-    var inputs = viewDepartmentsQuery(queryData);
+    sql = "Select * from department;";
+  }
+  else if (queryData.userChoice == "view all roles") {
+    sql = "Select * from role;";
+  }
+  else if (queryData.userChoice == "view all employees") {
+    sql = sql = "Select * from employee;";
+  }
+  else if (queryData.userChoice ==  "add a department") {
+    var inputs = addDepartmentQuery(queryData);
+    sql = inputs[0];
+    params = inputs[1];
+  }
+  else if (queryData.userChoice ==  "add a role") {
+    var inputs = addRoleQuery(queryData);
+    sql = inputs[0];
+    params = inputs[1];
+  }
+  else if (queryData.userChoice ==  "add an employee") {
+    var inputs = addEmployeeQuery(queryData);
+    sql = inputs[0];
+    params = inputs[1];
+  }
+  else if (queryData.userChoice ==  "update an employee role") {
+    var inputs = updateEmployee(queryData);
     sql = inputs[0];
     params = inputs[1];
   }
@@ -184,8 +209,19 @@ const handleUserInput = function (queryData) {
   });
 };
 
-const viewDepartmentsQuery = function (queryData) {
-  return ["Select * from department;", []];
+const addDepartmentQuery = function (queryData) {
+  return [`INSERT INTO department (name)
+   VALUES (?) ;`, [queryData.departmentAddName]];
+};
+
+const addRoleQuery = function (queryData) {
+  return [`INSERT INTO role (salary,title,department_id)
+   VALUES (?,?,?) ;`, [queryData.roleAddName,queryData.roleAddName,query.roleAddSalary]];
+};
+
+const addEmployeeQuery = function (queryData) {
+  return [`INSERT INTO employee (first_name,last_name,role_id,manager_id)
+   VALUES (?,?,?,?,?) ;`, [queryData.employeeAddFName,queryData.employeeAddLName,queryData.employeeAddRole,queryData.employeeAddManager]];
 };
 
 const init = function () {
