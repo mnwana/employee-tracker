@@ -4,14 +4,14 @@ const db = require("./db/connection");
 const cTable = require("console.table");
 
 const userChoices = [
-  // "view all departments",
-  // "view all roles",
-  // "view all employees",
+  "view all departments",
+  "view all roles",
+  "view all employees",
   "add a department",
   "add a role",
   "add an employee",
   "update an employee role",
-  // "complete queries",
+  "complete queries",
 ];
 
 const roles = function () {
@@ -85,8 +85,7 @@ const departments = function () {
 };
 
 const departmentId = function (departmentName) {
-  var sql =
-    "Select department.id from department where name = ?;";
+  var sql = "Select department.id from department where name = ?;";
   return new Promise((resolve, reject) =>
     db.query(sql, [departmentName], (err, result) => {
       if (err) {
@@ -97,7 +96,6 @@ const departmentId = function (departmentName) {
     })
   );
 };
-
 
 const promptUser = function () {
   return inquirer
@@ -263,7 +261,7 @@ const handleUserInput = function (queryData) {
       console.table(result);
     });
   } else if (queryData.userChoice == "view all roles") {
-    db.query("Select * from role;", [], (err, result) => {
+    db.query("Select role.*, department.name from role left join department on role.department_id = department.id;", [], (err, result) => {
       if (err) {
         console.log(err);
         return;
@@ -271,7 +269,11 @@ const handleUserInput = function (queryData) {
       console.table(result);
     });
   } else if (queryData.userChoice == "view all employees") {
-    db.query("Select * from employee;", [], (err, result) => {
+    db.query(`Select first_name,last_name, role.title as role, role.salary, department.name as department, manager.name as manager   
+    from employee left join role on employee.role_id = role.id 
+    left join department on department.id = role.department_id
+    left join employee as managers on manager.id = employee.manager_id
+    ;`, [], (err, result) => {
       if (err) {
         console.log(err);
         return;
@@ -290,7 +292,7 @@ const handleUserInput = function (queryData) {
 };
 
 const addDepartmentQuery = function (queryData) {
-  var sql  =`INSERT INTO department (name) VALUES (?) ;`
+  var sql = `INSERT INTO department (name) VALUES (?) ;`;
   db.query(sql, [], (err, result) => {
     if (err) {
       console.log(err);
@@ -301,11 +303,10 @@ const addDepartmentQuery = function (queryData) {
 };
 
 const addRoleQuery = function (queryData) {
-  var sql = 
-    `INSERT INTO role (salary,title,department_id)
+  var sql = `INSERT INTO role (salary,title,department_id)
    VALUES (?,?,?) ;`;
-   var params = [queryData.roleAddSalary,queryData.roleAddName];
-   departmentId(queryData.roleAddDepartment).then((result) => {
+  var params = [queryData.roleAddSalary, queryData.roleAddName];
+  departmentId(queryData.roleAddDepartment).then((result) => {
     params.push(result);
     db.query(sql, params, (err, result) => {
       if (err) {
@@ -338,7 +339,7 @@ const addEmployeeQuery = function (queryData) {
 
 const updateEmployeeQuery = function (queryData) {
   var sql = `UPDATE employee SET role_id = ? WHERE ID = ? ;`;
-  var params = []
+  var params = [];
   roleId(queryData.updateEmployeeRole).then((result) => {
     params.push(result);
     employeeId(queryData.updateEmployeeName).then((result) => {
@@ -364,5 +365,3 @@ const init = function () {
 };
 
 init();
-
-// console.log(employeeId('Mike Monee'));
