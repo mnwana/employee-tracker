@@ -21,8 +21,8 @@ VALUES
 ('Assistant',34000,6);
 
 INSERT INTO employee
-(first_name,last_name,role,manager_id)
-VAUES 
+(first_name,last_name,role_id,manager_id)
+VALUES 
 ('Marie','Nolan',2,NULL),
 ('Nicole','Jenkins',1,NULL),
 ('Mike','Monee',3,NULL),

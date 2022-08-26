@@ -63,8 +63,9 @@ const promptUser = function () {
         name: "roleAddDepartment",
         message:
           "Please enter the department of the role you would like to add:",
-        //   update this to be roles in DB
-        type: "input",
+        
+        type: "list",
+        choices: departments,
         when: ({ userChoice }) => {
           if (userChoice == "add a role") {
             return true;
@@ -103,8 +104,8 @@ const promptUser = function () {
         name: "employeeAddRole",
         message:
           "Please enter the first name of the employee you would like to add:",
-        //   update this to be roles in DB
-        type: "input",
+        type: "list",
+        choices: roles,
         when: ({ userChoice }) => {
           if (userChoice == "add an employee") {
             return true;
@@ -117,8 +118,9 @@ const promptUser = function () {
         name: "employeeAddManager",
         message:
           "Please enter the manager of the employee you would like to add:",
-        //   update this to be managers in DB
-        type: "input",
+        
+        type: "list",
+        choices: employees,
         when: ({ userChoice }) => {
           if (userChoice == "add an employee") {
             return true;
@@ -131,8 +133,8 @@ const promptUser = function () {
         name: "updateEmployeeName",
         message:
           "Please select the name of the employee you would like to update:",
-        choices: departments,
-        type: "input",
+        choices: employees,
+        type: "list",
         when: ({ userChoice }) => {
           if (userChoice == "add an employee") {
             return true;
@@ -146,7 +148,7 @@ const promptUser = function () {
         message:
           "Please select the new role of the employee you would like to update:",
         choices: roles,
-        type: "input",
+        type: "list",
         when: ({ userChoice }) => {
           if (userChoice == "add an employee") {
             return true;
@@ -199,7 +201,7 @@ const handleUserInput = function (queryData) {
     sql = inputs[0];
     params = inputs[1];
   }
-  db.query(sql, (err, result) => {
+  db.query(sql, params, (err, result) => {
     if (err) {
       console.log(err);
       return;
@@ -211,6 +213,17 @@ const handleUserInput = function (queryData) {
 
 const roles = function () {
   var sql = "Select title from role"
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log(result);
+  });
+}
+
+const employees = function () {
+  var sql = "Select first_name from employee"
   db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
@@ -237,8 +250,10 @@ const addDepartmentQuery = function (queryData) {
 };
 
 const addRoleQuery = function (queryData) {
+  console.log([queryData.roleAddSalary,queryData.roleAddName, query.roleAddDepartment]);
   return [`INSERT INTO role (salary,title,department_id)
-   VALUES (?,?,?) ;`, [queryData.roleAddName,queryData.roleAddName,query.roleAddSalary]];
+   VALUES (?,?,?) ;`,
+   [queryData.roleAddSalary,queryData.roleAddName, parseInt(query.roleAddDepartment)]];
 };
 
 const addEmployeeQuery = function (queryData) {
