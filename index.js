@@ -131,7 +131,7 @@ const promptUser = function () {
         name: "updateEmployeeName",
         message:
           "Please select the name of the employee you would like to update:",
-        //   update this to be employees in DB
+        choices: departments,
         type: "input",
         when: ({ userChoice }) => {
           if (userChoice == "add an employee") {
@@ -145,7 +145,7 @@ const promptUser = function () {
         name: "updateEmployeeRole",
         message:
           "Please select the new role of the employee you would like to update:",
-        //   update this to be employees in DB
+        choices: roles,
         type: "input",
         when: ({ userChoice }) => {
           if (userChoice == "add an employee") {
@@ -195,7 +195,7 @@ const handleUserInput = function (queryData) {
     params = inputs[1];
   }
   else if (queryData.userChoice ==  "update an employee role") {
-    var inputs = updateEmployee(queryData);
+    var inputs = updateEmployeeQuery(queryData);
     sql = inputs[0];
     params = inputs[1];
   }
@@ -208,6 +208,28 @@ const handleUserInput = function (queryData) {
     console.log('Move arrow up or down to reveal menu and choose another action.');
   });
 };
+
+const roles = function () {
+  var sql = "Select title from role"
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log(result);
+  });
+}
+
+const departments = function () {
+  var sql = "Select name from department"
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log(result);
+  });
+}
 
 const addDepartmentQuery = function (queryData) {
   return [`INSERT INTO department (name)
@@ -222,6 +244,12 @@ const addRoleQuery = function (queryData) {
 const addEmployeeQuery = function (queryData) {
   return [`INSERT INTO employee (first_name,last_name,role_id,manager_id)
    VALUES (?,?,?,?,?) ;`, [queryData.employeeAddFName,queryData.employeeAddLName,queryData.employeeAddRole,queryData.employeeAddManager]];
+};
+
+const updateEmployeeQuery = function (queryData) {
+  return [`UPDATE employee 
+  SET role = ?
+  WHERE ID = ? ;`, [queryData.updateEmployeeRole,queryData.updateEmployeeID]];
 };
 
 const init = function () {
