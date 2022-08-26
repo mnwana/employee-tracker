@@ -1,4 +1,5 @@
 const inquirer = require("inquirer");
+const db = require("./db/connection");
 
 const userChoices = [
   "view all departments",
@@ -8,7 +9,7 @@ const userChoices = [
   "add a role",
   "add an employee",
   "update an employee role",
-  "complete queries"
+  "complete queries",
 ];
 
 const promptUser = function () {
@@ -156,25 +157,42 @@ const promptUser = function () {
     ])
     .then((queryData) => {
       console.log(queryData);
-      if(queryData.userChoice=="complete queries"){
-        handleUserInput(queryData);
-      }
-      else {
+      handleUserInput(queryData);
+      if (queryData.userChoice == "complete queries") {
+        console.log("Goodbye!");
+      } else {
         promptUser();
       }
     });
 };
 
-const handleUserInput = function(queryData) {
+const handleUserInput = function (queryData) {
+  var sql = "";
+  var params = [];
+  if (queryData.userChoice == "view all departments") {
+    var inputs = viewDepartmentsQuery(queryData);
+    sql = inputs[0];
+    params = inputs[1];
+  }
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log(result);
+    console.log('Move arrow up or down to reveal menu and choose another action.');
+  });
+};
 
+const viewDepartmentsQuery = function (queryData) {
+  return ["Select * from department;", []];
 };
 
 const init = function () {
   if (process.argv[2] == "mock") {
   } else {
-    // prompt user for team input
     promptUser().then(() => {
-      console.log("Goodbye!");
+      console.log("");
     });
   }
 };
