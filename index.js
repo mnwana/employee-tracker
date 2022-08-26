@@ -14,14 +14,14 @@ const userChoices = [
 ];
 
 const roles = function () {
-  var sql = "Select title from role;"
+  var sql = "Select distinct concat(department.name, ' - ' , role.title) as title from role left join department on role.department_id = department.id;"
   return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
     if (err) {
       console.log(err);
       return reject;
     }
-    // console.log(result.map(a => a.name));
-    resolve(result.map(a => a.name));
+    console.log(result.map(a => a.title));
+    resolve(result.map(a => a.title));
   }));
 }
 
@@ -44,7 +44,6 @@ const departments = function () {
       console.log(err);
       return reject;
     }
-    // console.log(result.map(a => a.name));
     resolve(result.map(a => a.name));
   }));
 }
