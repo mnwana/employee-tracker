@@ -240,14 +240,30 @@ const promptUser = function () {
 };
 
 const handleUserInput = function (queryData) {
-  var sql = "";
-  var params = [];
   if (queryData.userChoice == "view all departments") {
-    sql = "Select * from department;";
+    db.query("Select * from department;", [], (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.table(result);
+    });
   } else if (queryData.userChoice == "view all roles") {
-    sql = "Select * from role;";
+    db.query("Select * from role;", [], (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.table(result);
+    });
   } else if (queryData.userChoice == "view all employees") {
-    sql = sql = "Select * from employee;";
+    db.query("Select * from employee;", [], (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.table(result);
+    });
   } else if (queryData.userChoice == "add a department") {
     var inputs = addDepartmentQuery(queryData);
     sql = inputs[0];
@@ -263,13 +279,6 @@ const handleUserInput = function (queryData) {
     sql = inputs[0];
     params = inputs[1];
   }
-  // db.query(sql, params, (err, result) => {
-  //   if (err) {
-  //     console.log(err);
-  //     return;
-  //   }
-  //   console.table(result);
-  // });
 };
 
 const addDepartmentQuery = function (queryData) {
