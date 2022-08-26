@@ -7,10 +7,10 @@ const userChoices = [
   // "view all departments",
   // "view all roles",
   // "view all employees",
-  // "add a department",
-  // "add a role",
+  "add a department",
+  "add a role",
   "add an employee",
-  // "update an employee role",
+  "update an employee role",
   // "complete queries",
 ];
 
@@ -57,6 +57,20 @@ const employees = function () {
   );
 };
 
+const employeeId = function (employeeName) {
+  var sql =
+    "Select employee.id from employee where concat(first_name,' ', last_name) = ?;";
+  return new Promise((resolve, reject) =>
+    db.query(sql, [employeeName], (err, result) => {
+      if (err) {
+        console.log(err);
+        return reject;
+      }
+      resolve(result.map((a) => a.id)[0]);
+    })
+  );
+};
+
 const departments = function () {
   var sql = "Select name from department;";
   return new Promise((resolve, reject) =>
@@ -70,20 +84,20 @@ const departments = function () {
   );
 };
 
-const employeeId = function (employeeName) {
+const departmentId = function (departmentName) {
   var sql =
-    "Select employee.id from employee where concat(first_name,' ', last_name) = ?;";
+    "Select department.id from department where name = ?;";
   return new Promise((resolve, reject) =>
-    db.query(sql, [employeeName], (err, result) => {
+    db.query(sql, [departmentName], (err, result) => {
       if (err) {
         console.log(err);
         return reject;
       }
-      // console.log(result.map(a => a.id)[0]);
       resolve(result.map((a) => a.id)[0]);
     })
   );
 };
+
 
 const promptUser = function () {
   return inquirer
@@ -265,9 +279,7 @@ const handleUserInput = function (queryData) {
       console.table(result);
     });
   } else if (queryData.userChoice == "add a department") {
-    var inputs = addDepartmentQuery(queryData);
-    sql = inputs[0];
-    params = inputs[1];
+    addDepartmentQuery(queryData);
   } else if (queryData.userChoice == "add a role") {
     var inputs = addRoleQuery(queryData);
     sql = inputs[0];
@@ -290,20 +302,20 @@ const addDepartmentQuery = function (queryData) {
 };
 
 const addRoleQuery = function (queryData) {
-  console.log([
-    queryData.roleAddSalary,
-    queryData.roleAddName,
-    query.roleAddDepartment,
-  ]);
-  return [
+  var sql = 
     `INSERT INTO role (salary,title,department_id)
-   VALUES (?,?,?) ;`,
-    [
-      queryData.roleAddSalary,
-      queryData.roleAddName,
-      parseInt(query.roleAddDepartment),
-    ],
-  ];
+   VALUES (?,?,?) ;`;
+   var params = [queryData.roleAddSalary,queryData.roleAddName];
+   departmentId(queryData.roleAddDepartment).then((result) => {
+    params.push(result);
+    db.query(sql, params, (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.table(result);
+    });
+  });
 };
 
 const addEmployeeQuery = function (queryData) {
