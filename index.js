@@ -245,6 +245,7 @@ const promptUser = function () {
       handleUserInput(queryData);
       if (queryData.userChoice == "complete queries") {
         console.log("Goodbye!");
+        process.exit();
       } else {
         promptUser();
       }
@@ -258,6 +259,7 @@ const handleUserInput = function (queryData) {
         console.log(err);
         return;
       }
+      console.log(`\n`);
       console.table(result);
     });
   } else if (queryData.userChoice == "view all roles") {
@@ -266,18 +268,20 @@ const handleUserInput = function (queryData) {
         console.log(err);
         return;
       }
+      console.log(`\n`);
       console.table(result);
     });
   } else if (queryData.userChoice == "view all employees") {
-    db.query(`Select first_name,last_name, role.title as role, role.salary, department.name as department, manager.name as manager   
+    db.query(`Select employee.first_name,employee.last_name, role.title as role, role.salary, department.name as department, concat(manager.first_name, ' ',manager.last_name) as manager   
     from employee left join role on employee.role_id = role.id 
     left join department on department.id = role.department_id
-    left join employee as managers on manager.id = employee.manager_id
+    left join employee as manager on manager.id = employee.manager_id
     ;`, [], (err, result) => {
       if (err) {
         console.log(err);
         return;
       }
+      console.log(`\n`);
       console.table(result);
     });
   } else if (queryData.userChoice == "add a department") {
@@ -298,6 +302,7 @@ const addDepartmentQuery = function (queryData) {
       console.log(err);
       return;
     }
+    console.log(`\n`);
     console.table(result);
   });
 };
@@ -313,6 +318,7 @@ const addRoleQuery = function (queryData) {
         console.log(err);
         return;
       }
+      console.log(`\n`);
       console.table(result);
     });
   });
@@ -331,6 +337,7 @@ const addEmployeeQuery = function (queryData) {
           console.log(err);
           return;
         }
+        console.log(`\n`);
         console.table(result);
       });
     });
@@ -349,6 +356,7 @@ const updateEmployeeQuery = function (queryData) {
           console.log(err);
           return;
         }
+        console.log(`\n`);
         console.table(result);
       });
     });
