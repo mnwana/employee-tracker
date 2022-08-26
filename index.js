@@ -241,7 +241,6 @@ const promptUser = function () {
       },
     ])
     .then((queryData) => {
-      // console.log(queryData);
       handleUserInput(queryData);
       if (queryData.userChoice == "complete queries") {
         console.log("Goodbye!");
@@ -263,27 +262,35 @@ const handleUserInput = function (queryData) {
       console.table(result);
     });
   } else if (queryData.userChoice == "view all roles") {
-    db.query("Select role.*, department.name from role left join department on role.department_id = department.id;", [], (err, result) => {
-      if (err) {
-        console.log(err);
-        return;
+    db.query(
+      "Select role.*, department.name from role left join department on role.department_id = department.id;",
+      [],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log(`\n`);
+        console.table(result);
       }
-      console.log(`\n`);
-      console.table(result);
-    });
+    );
   } else if (queryData.userChoice == "view all employees") {
-    db.query(`Select employee.first_name,employee.last_name, role.title as role, role.salary, department.name as department, concat(manager.first_name, ' ',manager.last_name) as manager   
+    db.query(
+      `Select employee.first_name,employee.last_name, role.title as role, role.salary, department.name as department, concat(manager.first_name, ' ',manager.last_name) as manager   
     from employee left join role on employee.role_id = role.id 
     left join department on department.id = role.department_id
     left join employee as manager on manager.id = employee.manager_id
-    ;`, [], (err, result) => {
-      if (err) {
-        console.log(err);
-        return;
+    ;`,
+      [],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log(`\n`);
+        console.table(result);
       }
-      console.log(`\n`);
-      console.table(result);
-    });
+    );
   } else if (queryData.userChoice == "add a department") {
     addDepartmentQuery(queryData);
   } else if (queryData.userChoice == "add a role") {
@@ -297,7 +304,7 @@ const handleUserInput = function (queryData) {
 
 const addDepartmentQuery = function (queryData) {
   var sql = `INSERT INTO department (name) VALUES (?) ;`;
-  db.query(sql, [], (err, result) => {
+  db.query(sql, [queryData.departmentAddName], (err, result) => {
     if (err) {
       console.log(err);
       return;
@@ -367,7 +374,6 @@ const init = function () {
   if (process.argv[2] == "mock") {
   } else {
     promptUser().then(() => {
-      console.log("");
     });
   }
 };
