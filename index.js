@@ -1,52 +1,89 @@
 const inquirer = require("inquirer");
 const { query } = require("./db/connection");
 const db = require("./db/connection");
-const cTable = require('console.table');
+const cTable = require("console.table");
 
 const userChoices = [
-  "view all departments",
-  "view all roles",
-  "view all employees",
-  "add a department",
-  "add a role",
+  // "view all departments",
+  // "view all roles",
+  // "view all employees",
+  // "add a department",
+  // "add a role",
   "add an employee",
-  "update an employee role",
-  "complete queries",
+  // "update an employee role",
+  // "complete queries",
 ];
 
 const roles = function () {
-  var sql = "Select distinct concat(department.name, ' - ' , role.title) as title from role left join department on role.department_id = department.id;"
-  return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
-    if (err) {
-      console.log(err);
-      return reject;
-    }
-    console.log(result.map(a => a.title));
-    resolve(result.map(a => a.title));
-  }));
-}
+  var sql =
+    "Select distinct concat(department.name, ' - ' , role.title) as title from role left join department on role.department_id = department.id;";
+  return new Promise((resolve, reject) =>
+    db.query(sql, [], (err, result) => {
+      if (err) {
+        console.log(err);
+        return reject;
+      }
+      // console.log(result.map(a => a.title));
+      resolve(result.map((a) => a.title));
+    })
+  );
+};
+
+const roleId = function (roleName) {
+  var sql =
+    "Select role.id from role left join department on role.department_id = department.id where concat(department.name, ' - ' , role.title) = ?;";
+  return new Promise((resolve, reject) =>
+    db.query(sql, [roleName], (err, result) => {
+      if (err) {
+        console.log(err);
+        return reject;
+      }
+      // console.log(result.map(a => a.id)[0]);
+      resolve(result.map((a) => a.id)[0]);
+    })
+  );
+};
 
 const employees = function () {
-  var sql = "Select concat(first_name,' ', last_name) as name from employee;"
-  return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
-    if (err) {
-      console.log(err);
-      return reject;
-    }
-    resolve(result.map(a => a.name));
-  }));
-}
+  var sql = "Select concat(first_name,' ', last_name) as name from employee;";
+  return new Promise((resolve, reject) =>
+    db.query(sql, [], (err, result) => {
+      if (err) {
+        console.log(err);
+        return reject;
+      }
+      resolve(result.map((a) => a.name));
+    })
+  );
+};
 
 const departments = function () {
-  var sql = "Select name from department;"
-  return new Promise ((resolve,reject) => db.query(sql, [], (err, result) => {
-    if (err) {
-      console.log(err);
-      return reject;
-    }
-    resolve(result.map(a => a.name));
-  }));
-}
+  var sql = "Select name from department;";
+  return new Promise((resolve, reject) =>
+    db.query(sql, [], (err, result) => {
+      if (err) {
+        console.log(err);
+        return reject;
+      }
+      resolve(result.map((a) => a.name));
+    })
+  );
+};
+
+const employeeId = function (employeeName) {
+  var sql =
+    "Select employee.id from employee where concat(first_name,' ', last_name) = ?;";
+  return new Promise((resolve, reject) =>
+    db.query(sql, [employeeName], (err, result) => {
+      if (err) {
+        console.log(err);
+        return reject;
+      }
+      // console.log(result.map(a => a.id)[0]);
+      resolve(result.map((a) => a.id)[0]);
+    })
+  );
+};
 
 const promptUser = function () {
   return inquirer
@@ -151,7 +188,7 @@ const promptUser = function () {
         name: "employeeAddManager",
         message:
           "Please enter the manager of the employee you would like to add:",
-        
+
         type: "list",
         choices: employees,
         when: ({ userChoice }) => {
@@ -192,7 +229,7 @@ const promptUser = function () {
       },
     ])
     .then((queryData) => {
-      console.log(queryData);
+      // console.log(queryData);
       handleUserInput(queryData);
       if (queryData.userChoice == "complete queries") {
         console.log("Goodbye!");
@@ -207,64 +244,85 @@ const handleUserInput = function (queryData) {
   var params = [];
   if (queryData.userChoice == "view all departments") {
     sql = "Select * from department;";
-  }
-  else if (queryData.userChoice == "view all roles") {
+  } else if (queryData.userChoice == "view all roles") {
     sql = "Select * from role;";
-  }
-  else if (queryData.userChoice == "view all employees") {
+  } else if (queryData.userChoice == "view all employees") {
     sql = sql = "Select * from employee;";
-  }
-  else if (queryData.userChoice ==  "add a department") {
+  } else if (queryData.userChoice == "add a department") {
     var inputs = addDepartmentQuery(queryData);
     sql = inputs[0];
     params = inputs[1];
-  }
-  else if (queryData.userChoice ==  "add a role") {
+  } else if (queryData.userChoice == "add a role") {
     var inputs = addRoleQuery(queryData);
     sql = inputs[0];
     params = inputs[1];
-  }
-  else if (queryData.userChoice ==  "add an employee") {
-    var inputs = addEmployeeQuery(queryData);
-    sql = inputs[0];
-    params = inputs[1];
-  }
-  else if (queryData.userChoice ==  "update an employee role") {
+  } else if (queryData.userChoice == "add an employee") {
+    addEmployeeQuery(queryData);
+  } else if (queryData.userChoice == "update an employee role") {
     var inputs = updateEmployeeQuery(queryData);
     sql = inputs[0];
     params = inputs[1];
   }
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.table(result);
-    console.log('Move arrow up or down to reveal menu and choose another action.');
-  });
+  // db.query(sql, params, (err, result) => {
+  //   if (err) {
+  //     console.log(err);
+  //     return;
+  //   }
+  //   console.table(result);
+  // });
 };
 
 const addDepartmentQuery = function (queryData) {
-  return [`INSERT INTO department (name)
-   VALUES (?) ;`, [queryData.departmentAddName]];
+  return [
+    `INSERT INTO department (name)
+   VALUES (?) ;`,
+    [queryData.departmentAddName],
+  ];
 };
 
 const addRoleQuery = function (queryData) {
-  console.log([queryData.roleAddSalary,queryData.roleAddName, query.roleAddDepartment]);
-  return [`INSERT INTO role (salary,title,department_id)
+  console.log([
+    queryData.roleAddSalary,
+    queryData.roleAddName,
+    query.roleAddDepartment,
+  ]);
+  return [
+    `INSERT INTO role (salary,title,department_id)
    VALUES (?,?,?) ;`,
-   [queryData.roleAddSalary,queryData.roleAddName, parseInt(query.roleAddDepartment)]];
+    [
+      queryData.roleAddSalary,
+      queryData.roleAddName,
+      parseInt(query.roleAddDepartment),
+    ],
+  ];
 };
 
 const addEmployeeQuery = function (queryData) {
-  return [`INSERT INTO employee (first_name,last_name,role_id,manager_id)
-   VALUES (?,?,?,?,?) ;`, [queryData.employeeAddFName,queryData.employeeAddLName,queryData.employeeAddRole,queryData.employeeAddManager]];
+  var sql = `INSERT INTO employee (first_name,last_name,role_id,manager_id)
+    VALUES (?,?,?,?) ;`;
+  var params = [queryData.employeeAddFName, queryData.employeeAddLName];
+  roleId(queryData.employeeAddRole).then((result) => {
+    params.push(result);
+    employeeId(queryData.employeeAddManager).then((result) => {
+      params.push(result);
+      db.query(sql, params, (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.table(result);
+      });
+    });
+  });
 };
 
 const updateEmployeeQuery = function (queryData) {
-  return [`UPDATE employee 
+  return [
+    `UPDATE employee 
   SET role_id = ?
-  WHERE ID = ? ;`, [queryData.updateEmployeeRole,queryData.updateEmployeeID]];
+  WHERE ID = ? ;`,
+    [queryData.updateEmployeeRole, queryData.updateEmployeeID],
+  ];
 };
 
 const init = function () {
@@ -277,3 +335,5 @@ const init = function () {
 };
 
 init();
+
+// console.log(employeeId('Mike Monee'));
