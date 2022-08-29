@@ -233,7 +233,7 @@ const promptUser = function () {
         type: "list",
         choices: employees,
         when: ({ managerConfirm }) => {
-          if (managerConfirm == "add an employee") {
+          if (managerConfirm) {
             return true;
           } else {
             return false;
