@@ -300,7 +300,7 @@ const handleUserInput = function (queryData) {
     // select role title, id, salary, and department name
   } else if (queryData.userChoice == "view all roles") {
     db.query(
-      "Select role.*, department.name from role left join department on role.department_id = department.id;",
+      "Select role.id, role.title, department.name as department_name from role left join department on role.department_id = department.id;",
       [],
       (err, result) => {
         if (err) {
