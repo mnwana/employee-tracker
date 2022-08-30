@@ -18,9 +18,9 @@
 ## Usage 
  This application will provide you with prompts once you run "node index.js". These prompts will take user input to interact with the employee database.
  
- ![screen shot of README Generator](/assets/images/screenshot.png) 
+ ![screen shot of README Generator](public/assets/images/screenshot.png) 
  
-  [Video of a walkthrough](/assets/videos/Employee-tracker.mov) 
+  [Video of a walkthrough](/public/assets/videos/Employee-tracker.mov) 
 
 ## Questions 
  - [mnwana](https://github.com/mnwana) 
